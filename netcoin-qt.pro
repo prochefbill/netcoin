@@ -1,6 +1,10 @@
 TEMPLATE = app
-TARGET = netcoin-qt
-VERSION = 2.5.2
+TARGET = netcoin-testnet
+VERSION = 3.0.0
+CONFIG += qt
+QT += gui
+    QT += widgets
+
 INCLUDEPATH += src src/json src/qt
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
@@ -28,20 +32,17 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
-win32 {
-    BOOST_LIB_SUFFIX=-mgw49-mt-s-1_55
-    BOOST_INCLUDE_PATH=C:/deps/boost_1_55_0
-    BOOST_LIB_PATH=C:/deps/boost_1_55_0/stage/lib
-    BDB_INCLUDE_PATH=C:/deps/db-4.8.30.NC/build_unix
-    BDB_LIB_PATH=C:/deps/db-4.8.30.NC/build_unix
-    OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2l/include
-    OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2l
-    MINIUPNPC_INCLUDE_PATH=C:/deps/
-    MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
-    QRENCODE_INCLUDE_PATH=C:/deps/qrencode-3.4.4
-    QRENCODE_LIB_PATH=C:/deps/qrencode-3.4.4/.libs
-}
-
+    win32:BOOST_LIB_SUFFIX=-mgw49-mt-s-x32-1_68
+    win32:BOOST_INCLUDE_PATH=C:/deps/boost_1_68_0
+    win32:BOOST_LIB_PATH=C:/deps/boost_1_68_0/stage/lib
+    win32:BDB_INCLUDE_PATH=C:/deps/db-6.2.32.NC/build_unix
+    win32:BDB_LIB_PATH=C:/deps/db-6.2.32.NC/build_unix
+    win32:OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2q/include
+    win32:OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2q
+    win32:MINIUPNPC_INCLUDE_PATH=C:/deps/
+    win32:MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
+    win32:QRENCODE_INCLUDE_PATH=C:/deps/qrencode-4.0.2
+    win32:QRENCODE_LIB_PATH=C:/deps/qrencode-4.0.2/.libs
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -75,7 +76,18 @@ contains(USE_QRCODE, 1) {
     DEFINES += USE_QRCODE
     LIBS += -lqrencode
 }
-
+# use: qmake "USE_IPV6=1" (enabled by default; default)
+#  or: qmake "USE_IPV6=0" (disabled by default)
+#  or: qmake "USE_IPV6=-" (not supported)
+contains(USE_IPV6, -) {
+    message(Building without IPv6 support)
+} else {
+    message(Building with IPv6 support)
+    count(USE_IPV6, 0) {
+        USE_IPV6=1
+    }
+    DEFINES += USE_IPV6=$$USE_IPV6
+}
 # use: qmake "USE_UPNP=1" ( enabled by default; default)
 #  or: qmake "USE_UPNP=0" (disabled by default)
 #  or: qmake "USE_UPNP=-" (not supported)
@@ -148,8 +160,8 @@ macx: {
     ICON = src/mac/artwork/NetCoin.icns
     QMAKE_INFO_PLIST=src/mac/Info.plist
     # osx 10.9 has changed the stdlib default to libc++. To prevent some link error, you may need to use libstdc++
-    QMAKE_CXXFLAGS += -stdlib=libstdc++
-
+   !macx:QMAKE_CXXFLAGS += -stdlib=libstdc++
+    macx:QMAKE_CXXFLAGS += -stdlib=libc++
     QMAKE_CFLAGS_THREAD += -pthread
     QMAKE_CXXFLAGS_THREAD += -pthread
 }
@@ -157,6 +169,7 @@ macx: {
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
 LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a
 SOURCES += src/txdb-leveldb.cpp
+
 !win32 {
     # we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
     genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a
@@ -235,17 +248,6 @@ HEADERS += src/qt/bitcoingui.h \
     src/kernel.h \
     src/scrypt.h \
     src/pbkdf2.h \
-    src/zerocoin/Accumulator.h \
-    src/zerocoin/AccumulatorProofOfKnowledge.h \
-    src/zerocoin/Coin.h \
-    src/zerocoin/CoinSpend.h \
-    src/zerocoin/Commitment.h \
-    src/zerocoin/ParamGeneration.h \
-    src/zerocoin/Params.h \
-    src/zerocoin/SerialNumberSignatureOfKnowledge.h \
-    src/zerocoin/SpendMetaData.h \
-    src/zerocoin/ZeroTest.h \
-    src/zerocoin/Zerocoin.h \
     src/serialize.h \
     src/core.h \
     src/main.h \
@@ -281,6 +283,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/transactionfilterproxy.h \
     src/qt/transactionview.h \
     src/qt/walletmodel.h \
+        src/qt/qcustomplot.h \
     src/bitcoinrpc.h \
     src/qt/overviewpage.h \
     src/qt/csvmodelwriter.h \
@@ -301,7 +304,8 @@ HEADERS += src/qt/bitcoingui.h \
     src/clientversion.h \
     src/qt/shoppingpage.h \
     src/qt/networkpage.h \
-    src/threadsafety.h
+    src/threadsafety.h \
+    src/qt/stakereportdialoge.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -326,6 +330,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/hash.cpp \
     src/netbase.cpp \
     src/key.cpp \
+    src/qt/qcustomplot.cpp \
     src/script.cpp \
     src/core.cpp \
     src/main.cpp \
@@ -376,19 +381,9 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/scrypt-x86_64.S \
     src/scrypt.cpp \
     src/pbkdf2.cpp \
-    src/zerocoin/Accumulator.cpp \
-    src/zerocoin/AccumulatorProofOfKnowledge.cpp \
-    src/zerocoin/Coin.cpp \
-    src/zerocoin/CoinSpend.cpp \
-    src/zerocoin/Commitment.cpp \
-    src/zerocoin/ParamGeneration.cpp \
-    src/zerocoin/Params.cpp \
-    src/zerocoin/SerialNumberSignatureOfKnowledge.cpp \
-    src/zerocoin/SpendMetaData.cpp \
-    src/zerocoin/ZeroTest.cpp \
     src/qt/networkpage.cpp \
-    src/qt/shoppingpage.cpp
-
+    src/qt/shoppingpage.cpp \
+ src/qt/stakereportdialoge.cpp
 RESOURCES += \
     src/qt/bitcoin.qrc
 
@@ -409,7 +404,9 @@ FORMS += \
     src/qt/forms/charitydialog.ui \
     src/qt/forms/intro.ui \
     src/qt/forms/calcdialog.ui \
-    src/qt/forms/networkpage.ui
+    src/qt/forms/networkpage.ui \
+    src/qt/forms/stakereportdialog.ui
+
 
 contains(USE_QRCODE, 1) {
 HEADERS += src/qt/qrcodedialog.h

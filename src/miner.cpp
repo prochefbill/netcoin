@@ -517,6 +517,8 @@ bool CheckStake(CBlock* pblock, CWallet& wallet)
             LOCK(wallet.cs_wallet);
             wallet.mapRequestCount[hashBlock] = 0;
         }
+        if (IsInitialBlockDownload()||vNodes.empty())
+           return error("ProcessBlock() : CheckBlock FAILED no nodes to relay tx");
 
         // Process this block the same as if we had received it from another node
         if (!ProcessBlock(NULL, pblock))
