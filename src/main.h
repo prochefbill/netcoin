@@ -100,7 +100,7 @@ static const int BLOCK_HEIGHT_DIGISHIELD_FIX_START = 438500; //DIGISHIELD FIX FO
 static const int BLOCK_HEIGHT_FINALPOW =  2500000; // this is where the proof of work ends.
 static const int LOW_S_CHECK_SIGNATURES = 1300000; // CHECK SIGNATURE FORK
 static const int MAX_REORG_DEPTH = 68;
-static const unsigned int FORKTIME_REORG_PROTO_CHANGES = 15449184000; // 16/12/2018 @ 12:00am (gmt)
+static const unsigned int FORKTIME_REORG_PROTO_CHANGES = 1544918400; // 16/12/2018 @ 12:00am (gmt)
 static const int RECOVER_DBLSP_HEIGHT = 3390000; // DoubleSpend Fix MainNet
 
 
@@ -937,7 +937,7 @@ public:
 
     void print() const
     {
-        printf("CBlock(hash=%s, PoW=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRI64u ", vchBlockSig=%s)\n",
+        printf("CBlock(hash=%s, PoW=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRIszu ", vchBlockSig=%s)\n",
             GetHash().ToString().c_str(),
             GetPoWHash().ToString().c_str(),
             nVersion,

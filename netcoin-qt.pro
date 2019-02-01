@@ -1,6 +1,6 @@
 TEMPLATE = app
-TARGET = netcoin-testnet
-VERSION = 3.0.0
+TARGET = netcoin-qt
+VERSION = 2.5.2
 CONFIG += qt
 QT += gui
     QT += widgets
@@ -32,17 +32,20 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
-    win32:BOOST_LIB_SUFFIX=-mgw49-mt-s-x32-1_68
-    win32:BOOST_INCLUDE_PATH=C:/deps/boost_1_68_0
-    win32:BOOST_LIB_PATH=C:/deps/boost_1_68_0/stage/lib
-    win32:BDB_INCLUDE_PATH=C:/deps/db-6.2.32.NC/build_unix
-    win32:BDB_LIB_PATH=C:/deps/db-6.2.32.NC/build_unix
-    win32:OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2q/include
-    win32:OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2q
-    win32:MINIUPNPC_INCLUDE_PATH=C:/deps/
-    win32:MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
-    win32:QRENCODE_INCLUDE_PATH=C:/deps/qrencode-4.0.2
-    win32:QRENCODE_LIB_PATH=C:/deps/qrencode-4.0.2/.libs
+win32 {
+    BOOST_LIB_SUFFIX=-mgw49-mt-s-x32-1_68
+    BOOST_INCLUDE_PATH=C:/deps/boost_1_68_0
+    BOOST_LIB_PATH=C:/deps/boost_1_68_0/stage/lib
+    BDB_INCLUDE_PATH=C:/deps/db-6.2.32.NC/build_unix
+    BDB_LIB_PATH=C:/deps/db-6.2.32.NC/build_unix
+    OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2p/include
+    OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2p
+    MINIUPNPC_INCLUDE_PATH=C:/deps/
+    MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
+    QRENCODE_INCLUDE_PATH=C:/deps/qrencode-4.0.2
+    QRENCODE_LIB_PATH=C:/deps/qrencode-4.0.2/.libs
+}
+
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -131,21 +134,36 @@ macx: {
         }
     }
 
-    isEmpty(BOOST_LIB_PATH) {
-        BOOST_LIB_PATH = $$DEPSDIR/lib
-    }
+isEmpty(BOOST_LIB_SUFFIX) {
+    macx:BOOST_LIB_SUFFIX = -mt
+    windows:BOOST_LIB_SUFFIX = -mt
+}
 
-    isEmpty(BOOST_INCLUDE_PATH) {
-        BOOST_INCLUDE_PATH = $$DEPSDIR/include
-    }
+isEmpty(BOOST_THREAD_LIB_SUFFIX) {
+    win32:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
+    else:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
+}
 
-    isEmpty(BDB_LIB_PATH) {
-        BDB_LIB_PATH = $$DEPSDIR/lib
-    }
+isEmpty(BDB_LIB_PATH) {
+    macx:BDB_LIB_PATH = /opt/local/lib/db62
+}
 
-    isEmpty(BDB_INCLUDE_PATH) {
-        BDB_INCLUDE_PATH = $$DEPSDIR/include
-    }
+isEmpty(BDB_LIB_SUFFIX) {
+    macx:BDB_LIB_SUFFIX = -6.2
+}
+
+isEmpty(BDB_INCLUDE_PATH) {
+    macx:BDB_INCLUDE_PATH = /opt/local/include/db62
+}
+
+isEmpty(BOOST_LIB_PATH) {
+    macx:BOOST_LIB_PATH = /opt/local/lib
+}
+
+isEmpty(BOOST_INCLUDE_PATH) {
+    macx:BOOST_INCLUDE_PATH = /opt/local/include
+}
+
 
     HEADERS += src/qt/macdockiconhandler.h src/qt/macnotificationhandler.h
     OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm src/qt/macnotificationhandler.mm
@@ -157,11 +175,11 @@ macx: {
         $$BOOST_LIB_PATH/libboost_thread-mt.a \
         $$BOOST_LIB_PATH/libboost_chrono-mt.a
     DEFINES += MAC_OSX MSG_NOSIGNAL=0
-    ICON = src/mac/artwork/NetCoin.icns
+    ICON = src/mac/artwork/netcoin.icns
     QMAKE_INFO_PLIST=src/mac/Info.plist
     # osx 10.9 has changed the stdlib default to libc++. To prevent some link error, you may need to use libstdc++
-   !macx:QMAKE_CXXFLAGS += -stdlib=libstdc++
-    macx:QMAKE_CXXFLAGS += -stdlib=libc++
+    QMAKE_CXXFLAGS += -stdlib=libc++
+
     QMAKE_CFLAGS_THREAD += -pthread
     QMAKE_CXXFLAGS_THREAD += -pthread
 }
@@ -450,15 +468,15 @@ isEmpty(BOOST_THREAD_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db48
+    macx:BDB_LIB_PATH = /opt/local/lib/db62
 }
 
 isEmpty(BDB_LIB_SUFFIX) {
-    macx:BDB_LIB_SUFFIX = -4.8
+    macx:BDB_LIB_SUFFIX = -6.2
 }
 
 isEmpty(BDB_INCLUDE_PATH) {
-    macx:BDB_INCLUDE_PATH = /opt/local/include/db48
+    macx:BDB_INCLUDE_PATH = /opt/local/include/db62
 }
 
 isEmpty(BOOST_LIB_PATH) {
