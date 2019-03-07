@@ -543,7 +543,7 @@ pindexCheckpoint = mapBlockIndex[Checkpoints::hashSyncCheckpoint];
     QString QPeers = QString::number(peers);
     QString qVolume = QLocale::system().toString((qlonglong)volume);
 
-    if(nHeight > heightPrevious)
+    if(nHeight > heightPrevious && !IsInitialBlockDownload())
     {
         ui->heightBox->setText("<b><font color=\"green\">" + height + "</font></b>");
         static int64_t lastUpdate = 0;
@@ -552,7 +552,10 @@ pindexCheckpoint = mapBlockIndex[Checkpoints::hashSyncCheckpoint];
     }
     else
     {
+        if(!IsInitialBlockDownload())
         ui->heightBox->setText(height);
+                else
+                ui->heightBox->setText("downloading");
     }
 
     if(nSubsidy < rewardPrevious)

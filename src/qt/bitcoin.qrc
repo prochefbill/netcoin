@@ -27,7 +27,6 @@
         <file alias="edit">res/icons/edit.png</file>
         <file alias="history">res/icons/history.png</file>
         <file alias="export">res/icons/export.png</file>
-        <file alias="synced">res/icons/synced.png</file>
         <file alias="remove">res/icons/remove.png</file>
         <file alias="tx_mined">res/icons/tx_mined.png</file>
         <file alias="tx_input">res/icons/tx_input.png</file>
@@ -47,6 +46,7 @@
         <file>res/icons/stakingTab.png</file>
         <file>res/icons/netcoin.ico</file>
         <file>res/icons/netcoin.png</file>
+        <file alias="synced">res/icons/synced.gif</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
@@ -79,9 +79,10 @@
         <file>res/images/stakeminers.png</file>
         <file>res/images/coin2pay.png</file>
         <file>res/images/prohashing.png</file>
+        <file alias="splashgif">res/images/splashgif.gif</file>
     </qresource>
     <qresource prefix="/movies">
-        <file alias="spinner                  ">res/movies/update_spinner.mng</file>
+        <file alias="loading">res/movies/loader.gif</file>
     </qresource>
     <qresource prefix="/translations">
         <file alias="en">locale/bitcoin_en.qm</file>

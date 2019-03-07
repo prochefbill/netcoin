@@ -115,6 +115,7 @@ private:
     RPCConsole *rpcConsole;
 
     QMovie *syncIconMovie;
+    QMovie *syncIconMovie2;
     /** Keep track of previous number of blocks, to detect progress */
     int prevBlocks;
 

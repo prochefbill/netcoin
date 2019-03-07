@@ -90,7 +90,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="toggle5000">
+       <widget class="QRadioButton" name="toggleall">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
@@ -227,7 +227,7 @@
           </sizepolicy>
          </property>
          <property name="visible">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="styleSheet">
           <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop:0 #F0D0A0, stop:1 #F8D488);  color:#000000

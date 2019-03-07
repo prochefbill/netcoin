@@ -98,6 +98,8 @@ static const int BLOCK_HEIGHT_KGW_START = 218500; // HISTORICAL HARD FORK. DO NO
 static const int BLOCK_HEIGHT_POS_AND_DIGISHIELD_START = 420000; //POS + DIGISHIELD HISTORICAL FORK
 static const int BLOCK_HEIGHT_DIGISHIELD_FIX_START = 438500; //DIGISHIELD FIX FORK
 static const int BLOCK_HEIGHT_FINALPOW =  2500000; // this is where the proof of work ends.
+static const int BLOCK_HEIGHT_REPOW =  25000001; // this is where the proof of work ends.
+
 static const int LOW_S_CHECK_SIGNATURES = 1300000; // CHECK SIGNATURE FORK
 static const int MAX_REORG_DEPTH = 68;
 static const unsigned int FORKTIME_REORG_PROTO_CHANGES = 1544918400; // 16/12/2018 @ 12:00am (gmt)
@@ -109,8 +111,9 @@ static const int BLOCK_HEIGHT_KGW_START_TESTNET = 5;
 static const int BLOCK_HEIGHT_POS_AND_DIGISHIELD_START_TESTNET =10;
 static const int BLOCK_HEIGHT_DIGISHIELD_FIX_START_TESTNET =20;
 static const int BLOCK_HEIGHT_FINALPOW_TESTNET =  1000;
+static const int BLOCK_HEIGHT_REPOW_TESTNET =  15197;
 static const int LOW_S_CHECK_SIGNATURES_TESTET = 30;
-static const int MAX_REORG_DEPTH_TESTNET = 0;
+static const int MAX_REORG_DEPTH_TESTNET = 10;
 static const int RECOVER_DBLSP_HEIGHT_TESTNET = 500; // DoubleSpend Fix Testnet.
 static const unsigned int FORKTIME_REORG_PROTO_CHANGES_TEST_NET = 1547855940; // 11/12/2018 @ 10:50pm (gmt)
 inline bool ProtocolRetargetingFixed(int nHeight) { return TestNet() || nHeight > 1345000; }
@@ -937,7 +940,7 @@ public:
 
     void print() const
     {
-        printf("CBlock(hash=%s, PoW=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRIszu ", vchBlockSig=%s)\n",
+        printf("CBlock(hash=%s, PoW=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRI64u ", vchBlockSig=%s)\n",
             GetHash().ToString().c_str(),
             GetPoWHash().ToString().c_str(),
             nVersion,

@@ -117,7 +117,7 @@ void StakeForCharityDialog::on_enableButton_clicked()
     }
 
     int nCharityPercent = ui->charityPercentEdit->text().toInt(&fValidConversion, 10);
-    if (!fValidConversion || nCharityPercent > 50 || nCharityPercent <= 0)
+    if (!fValidConversion || nCharityPercent > 100 || nCharityPercent <= 0)
     {
         ui->message->setStyleSheet("QLabel { color: red; }");
         ui->message->setText(tr("Please Enter 1 - 50 for percent."));

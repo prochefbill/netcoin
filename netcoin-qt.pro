@@ -1,10 +1,10 @@
 TEMPLATE = app
-TARGET = netcoin-qt
-VERSION = 2.5.2
+TARGET = netcoin-testnet
+VERSION = 3.0.0
+
 CONFIG += qt
 QT += gui
     QT += widgets
-
 INCLUDEPATH += src src/json src/qt
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
@@ -31,20 +31,27 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 # Dependency library locations can be customized with:
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
-
-win32 {
-    BOOST_LIB_SUFFIX=-mgw49-mt-s-x32-1_68
-    BOOST_INCLUDE_PATH=C:/deps/boost_1_68_0
-    BOOST_LIB_PATH=C:/deps/boost_1_68_0/stage/lib
-    BDB_INCLUDE_PATH=C:/deps/db-6.2.32.NC/build_unix
-    BDB_LIB_PATH=C:/deps/db-6.2.32.NC/build_unix
-    OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2p/include
-    OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2p
-    MINIUPNPC_INCLUDE_PATH=C:/deps/
-    MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
-    QRENCODE_INCLUDE_PATH=C:/deps/qrencode-4.0.2
-    QRENCODE_LIB_PATH=C:/deps/qrencode-4.0.2/.libs
+contains(64BIT, 1) {
+message(Building with x86_64)
+   win32:BOOST_LIB_SUFFIX=-mgw82-mt-s-x64-1_68
+win32:DEPSROOT="64bit"
+message($$DEPSROOT)
 }
+else{
+message(Building with i386)
+   win32:BOOST_LIB_SUFFIX=-mgw74-mt-s-x32-1_68
+win32:DEPSROOT="32bit"
+}
+    win32:BOOST_INCLUDE_PATH=C:/deps/$$DEPSROOT/boost_1_68_0
+    win32:BOOST_LIB_PATH=C:/deps/$$DEPSROOT/boost_1_68_0/stage/lib
+    win32:BDB_INCLUDE_PATH=C:/deps/$$DEPSROOT/db-6.2.32.NC/build_unix
+  win32:BDB_LIB_PATH=C:/deps/$$DEPSROOT/db-6.2.32.NC/build_unix
+    win32:OPENSSL_INCLUDE_PATH=C:/deps/$$DEPSROOT/openssl-1.0.2q/include
+    win32:OPENSSL_LIB_PATH=C:/deps/$$DEPSROOT/openssl-1.0.2q
+    win32:MINIUPNPC_INCLUDE_PATH=C:/deps/$$DEPSROOT/
+    win32:MINIUPNPC_LIB_PATH=C:/deps/$$DEPSROOT/miniupnpc
+    win32:QRENCODE_INCLUDE_PATH=C:/deps/$$DEPSROOT/qrencode-4.0.2
+    win32:QRENCODE_LIB_PATH=C:/deps/$$DEPSROOT/qrencode-4.0.2/.libs
 
 OBJECTS_DIR = build
 MOC_DIR = build
@@ -70,7 +77,7 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 win32:QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-win32:QMAKE_LFLAGS *= -Wl,--large-address-aware -static
+win32:QMAKE_LFLAGS *= -static
 
 # use: qmake "USE_QRCODE=1"
 # libqrencode (http://fukuchi.org/works/qrencode/index.en.html) must be installed for support
@@ -134,36 +141,21 @@ macx: {
         }
     }
 
-isEmpty(BOOST_LIB_SUFFIX) {
-    macx:BOOST_LIB_SUFFIX = -mt
-    windows:BOOST_LIB_SUFFIX = -mt
-}
+    isEmpty(BOOST_LIB_PATH) {
+        BOOST_LIB_PATH = $$DEPSDIR/lib
+    }
 
-isEmpty(BOOST_THREAD_LIB_SUFFIX) {
-    win32:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
-    else:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
-}
+    isEmpty(BOOST_INCLUDE_PATH) {
+        BOOST_INCLUDE_PATH = $$DEPSDIR/include
+    }
 
-isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db62
-}
+    isEmpty(BDB_LIB_PATH) {
+        BDB_LIB_PATH = $$DEPSDIR/lib
+    }
 
-isEmpty(BDB_LIB_SUFFIX) {
-    macx:BDB_LIB_SUFFIX = -6.2
-}
-
-isEmpty(BDB_INCLUDE_PATH) {
-    macx:BDB_INCLUDE_PATH = /opt/local/include/db62
-}
-
-isEmpty(BOOST_LIB_PATH) {
-    macx:BOOST_LIB_PATH = /opt/local/lib
-}
-
-isEmpty(BOOST_INCLUDE_PATH) {
-    macx:BOOST_INCLUDE_PATH = /opt/local/include
-}
-
+    isEmpty(BDB_INCLUDE_PATH) {
+        BDB_INCLUDE_PATH = $$DEPSDIR/include
+    }
 
     HEADERS += src/qt/macdockiconhandler.h src/qt/macnotificationhandler.h
     OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm src/qt/macnotificationhandler.mm
@@ -175,11 +167,11 @@ isEmpty(BOOST_INCLUDE_PATH) {
         $$BOOST_LIB_PATH/libboost_thread-mt.a \
         $$BOOST_LIB_PATH/libboost_chrono-mt.a
     DEFINES += MAC_OSX MSG_NOSIGNAL=0
-    ICON = src/mac/artwork/netcoin.icns
+    ICON = src/mac/artwork/NetCoin.icns
     QMAKE_INFO_PLIST=src/mac/Info.plist
     # osx 10.9 has changed the stdlib default to libc++. To prevent some link error, you may need to use libstdc++
-    QMAKE_CXXFLAGS += -stdlib=libc++
-
+   !macx:QMAKE_CXXFLAGS += -stdlib=libstdc++
+    macx:QMAKE_CXXFLAGS += -stdlib=libc++
     QMAKE_CFLAGS_THREAD += -pthread
     QMAKE_CXXFLAGS_THREAD += -pthread
 }
@@ -468,15 +460,15 @@ isEmpty(BOOST_THREAD_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db62
+    macx:BDB_LIB_PATH = /opt/local/lib/db48
 }
 
 isEmpty(BDB_LIB_SUFFIX) {
-    macx:BDB_LIB_SUFFIX = -6.2
+    macx:BDB_LIB_SUFFIX = -4.8
 }
 
 isEmpty(BDB_INCLUDE_PATH) {
-    macx:BDB_INCLUDE_PATH = /opt/local/include/db62
+    macx:BDB_INCLUDE_PATH = /opt/local/include/db48
 }
 
 isEmpty(BOOST_LIB_PATH) {
@@ -509,12 +501,13 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
 LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
-LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
+LIBS += -lcrypto -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
 # -lgdi32 has to happen after -lcrypto (see  #681)
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock -lole32 -loleaut32 -luuid -lgdi32
 LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX
 windows:LIBS += -lboost_chrono$$BOOST_LIB_SUFFIX
-
+  windows:QMAKE_CFLAGS_THREAD += -mthread
+    windows:QMAKE_CXXFLAGS_THREAD += -mthread
 contains(RELEASE, 1) {
     !windows:!macx {
         # Linux: turn dynamic linking back on for c/c++ runtime libraries

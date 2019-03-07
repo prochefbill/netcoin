@@ -480,13 +480,13 @@ Value sendtoaddress(const Array& params, bool fHelp)
         wtx.mapValue["to"]      = params[3].get_str();
 
     // Transaction comment
-	std::string txcomment;
+    std::string txcomment;
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
-	{
+    {
         txcomment = params[4].get_str();
-		if (txcomment.length() > MAX_TX_COMMENT_LEN)
-			txcomment.resize(MAX_TX_COMMENT_LEN);
-	}
+        if (txcomment.length() > MAX_TX_COMMENT_LEN)
+            txcomment.resize(MAX_TX_COMMENT_LEN);
+    }
 
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
@@ -497,7 +497,6 @@ Value sendtoaddress(const Array& params, bool fHelp)
 
     return wtx.GetHash().GetHex();
 }
-
 Value listaddressgroupings(const Array& params, bool fHelp)
 {
     if (fHelp)
@@ -854,8 +853,10 @@ Value sendfrom(const Array& params, bool fHelp)
     wtx.strFromAccount = strAccount;
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
         wtx.mapValue["comment"] = params[4].get_str();
+
     if (params.size() > 5 && params[5].type() != null_type && !params[5].get_str().empty())
-        wtx.mapValue["to"]      = params[5].get_str();
+        wtx.mapValue["to"] = params[5].get_str();
+
 	std::string txcomment;
     if (params.size() > 6 && params[6].type() != null_type && !params[6].get_str().empty())
 	{
@@ -1983,7 +1984,7 @@ Value makekeypair(const Array& params, bool fHelp)
        error("prefix = %s", strPrefix.c_str());
         error("\n keytry =%s", strKeyfix.c_str());
 
-     } while ( strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()));
+     } while ( strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()) && nCount < 20);
 
       if (strPrefix != HexStr(key.GetPubKey()).substr(0, strPrefix.size()))
        return Value::null;

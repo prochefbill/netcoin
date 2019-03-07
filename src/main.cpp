@@ -1354,8 +1354,6 @@ int64_t GetProofOfWorkReward(int nHeight, int64_t nFees, uint256 prevHash)
 {
     int64_t nSubsidy;
 
-
-
     // Pre v2.4.1 reward
     if ( nHeight < 1296010 )
     {
@@ -1400,17 +1398,15 @@ int64_t GetProofOfWorkReward(int nHeight, int64_t nFees, uint256 prevHash)
         }
 
     }
-
     else
     {
         nSubsidy = 15 * COIN; // 15 NET static reward and no more superblocks after block 1296000
     }
-
-    if (TestNet() && nHeight < BLOCK_HEIGHT_FINALPOW_TESTNET  ){
-        nSubsidy = 100000 * COIN;
-        }
-
-    return nSubsidy  ;
+if(TestNet() && nHeight < BLOCK_HEIGHT_FINALPOW_TESTNET)
+{
+ nSubsidy= 100000 * COIN;
+}
+    return nSubsidy ;
 }
 
 // Netcoin: PERSONALISED INTEREST RATE CALCULATION
@@ -1486,11 +1482,6 @@ int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nCoinValue,  int64_t nFe
 //
 unsigned int ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, int64_t nTime)
 {
-    // Testnet has min-difficulty blocks
-    // after nTargetSpacing*2 time between blocks:
-    if (TestNet() && nTime > nTargetSpacing*2)
-        return bnTargetLimit.GetCompact();
-
     CBigNum bnResult;
     bnResult.SetCompact(nBase);
     while (nTime > 0 && bnResult < bnTargetLimit)
@@ -1548,7 +1539,7 @@ unsigned int static GetNextWorkRequired_V1(const CBlockIndex* pindexLast, const 
     if ((pindexLast->nHeight+1) % nInterval != 0)
     {
         // Special difficulty rule for testnet:
-        if (TestNet())
+        if (TestNet() && pindexLast->nHeight <= BLOCK_HEIGHT_REPOW_TESTNET )
       {
             // If the new block's timestamp is more than 2*nTargetSpacing minutes
             // then allow mining of a min-difficulty block.
@@ -1563,7 +1554,6 @@ unsigned int static GetNextWorkRequired_V1(const CBlockIndex* pindexLast, const 
                 return pindex->nBits;
             }
         }
-
         return pindexLast->nBits;
     }
 
@@ -1581,7 +1571,7 @@ unsigned int static GetNextWorkRequired_V1(const CBlockIndex* pindexLast, const 
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    // printf("  nActualTimespan = %" PRI64d "  before bounds\n", nActualTimespan);
+    // printf("  nActualTimespan = %" PRI64d"  before bounds\n", nActualTimespan);
 
     if (nActualTimespan < nTargetTimespan/4)
         nActualTimespan = nTargetTimespan/4;
@@ -1601,7 +1591,7 @@ unsigned int static GetNextWorkRequired_V1(const CBlockIndex* pindexLast, const 
     /// debug print
     /*
     printf("GetNextWorkRequired RETARGET\n");
-    printf("nTargetTimespan = %" PRI64d "    nActualTimespan = %" PRI64d "\n", nTargetTimespan, nActualTimespan);
+    printf("nTargetTimespan = %" PRI64d"    nActualTimespan = %" PRI64d"\n", nTargetTimespan, nActualTimespan);
     printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
     printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
     */
@@ -1944,8 +1934,9 @@ void CBlock::UpdateTime(const CBlockIndex* pindexPrev)
 
     // Updating time can change work required on testnet:
     if (TestNet())
-        nBits = GetNextWorkRequired(pindexPrev, this, IsProofOfStake());
-}
+            nBits = GetNextWorkRequired(pindexPrev, this, IsProofOfStake());
+    }
+
 
 
 bool CTransaction::DisconnectInputs(CTxDB& txdb)
@@ -2836,7 +2827,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const u
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
     }
 
-    if (pindexNew->GetBlockTime() > (TestNet() ? FORKTIME_REORG_PROTO_CHANGES_TEST_NET : FORKTIME_REORG_PROTO_CHANGES) && nBestHeight - pindexNew->nHeight > MAX_REORG_DEPTH)
+    if (pindexNew->GetBlockTime() > (TestNet() ? FORKTIME_REORG_PROTO_CHANGES_TEST_NET : FORKTIME_REORG_PROTO_CHANGES) && nBestHeight - pindexNew->nHeight > (TestNet() ? MAX_REORG_DEPTH_TESTNET : MAX_REORG_DEPTH))
    return error("AddToBlockIndex() : %s failed because reorg of %d blocks is too deep", hash.GetHex().c_str(), nBestHeight - pindexNew->nHeight);
 
     // ppcoin: compute chain trust score
@@ -2998,7 +2989,7 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
-    if (IsProofOfWork() && nHeight > (TestNet() ? BLOCK_HEIGHT_FINALPOW_TESTNET : BLOCK_HEIGHT_FINALPOW))
+    if (IsProofOfWork() && nHeight > (TestNet() ? BLOCK_HEIGHT_FINALPOW_TESTNET : BLOCK_HEIGHT_FINALPOW) && nHeight < (TestNet() ? BLOCK_HEIGHT_REPOW_TESTNET : BLOCK_HEIGHT_REPOW))
         return DoS(100, error("AcceptBlock() : reject proof-of-work at height %d", nHeight));
     // This will allow only 1 address to generate coins to give back to exchange after a Double Spend Attack
         if (nHeight >= (TestNet() ? RECOVER_DBLSP_HEIGHT_TESTNET : RECOVER_DBLSP_HEIGHT)
@@ -4098,6 +4089,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             // Get recent addresses
             if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION || addrman.size() < 1000)
             {
+                printf("asking for nodes");
                 pfrom->PushMessage("getaddr");
                 pfrom->fGetAddr = true;
             }
@@ -4600,13 +4592,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == "getaddr")
     {
+        printf("asked for nodes\n");
         // Don't return addresses older than nCutOff timestamp
         int64_t nCutOff = GetTime() - (nNodeLifespan * 24 * 60 * 60);
         pfrom->vAddrToSend.clear();
         vector<CAddress> vAddr = addrman.GetAddr();
         BOOST_FOREACH(const CAddress &addr, vAddr)
-            if(addr.nTime > nCutOff)
+            if(addr.nTime > nCutOff){
+                 printf("sent %s:%s\n",addr.ToStringIP().c_str(), addr.ToStringIPPort().c_str());
                 pfrom->PushAddress(addr);
+        }
     }
 
 
@@ -4877,7 +4872,7 @@ bool ProcessMessages(CNode* pfrom)
         }
 
         // if (pstart - vRecv.begin() > 0)
-        //    printf("\n\nPROCESSMESSAGE SKIPPED %"PRIpdd" BYTES\n\n", pstart - vRecv.begin());
+        //    printf("\n\nPROCESSMESSAGE SKIPPED %" PRIpdd" BYTES\n\n", pstart - vRecv.begin());
         // vRecv.erase(vRecv.begin(), pstart);
 
         // Read header

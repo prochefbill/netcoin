@@ -217,7 +217,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     statusBar()->addWidget(progressBar);
     statusBar()->addPermanentWidget(frameBlocks);
 
-    syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
+    syncIconMovie = new QMovie(":/movies/loading", "gif", this);
+
+    syncIconMovie2 = new QMovie(":/icons/synced", "gif", this);
     // this->setStyleSheet("background-color: #ceffee;");
 
     // Clicking on a transaction on the overview page simply sends you to transaction history page
@@ -426,8 +428,8 @@ void BitcoinGUI::createMenuBar()
     settings->addAction(encryptWalletAction);
     settings->addAction(changePassphraseAction);
     // settings->addAction(unlockWalletAction); //Moved to overviewpage
-    settings->addAction(lockWalletAction);
-    //settings->addAction(charityAction);
+    // settings->addAction(lockWalletAction); //Moved to overviewpage
+    //settings->addAction(charityAction); //Moved to overviewpage
     settings->addSeparator();
     settings->addAction(optionsAction);
     settings->addSeparator();
@@ -734,8 +736,8 @@ void BitcoinGUI::setNumBlocks(int count)
     if(secs < 90*60)
     {
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
-        labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-
+        labelBlocksIcon->setMovie(syncIconMovie2);
+        syncIconMovie2->start();
         overviewPage->showOutOfSyncWarning(false);
 
         progressBarLabel->setVisible(false);
@@ -781,10 +783,7 @@ void BitcoinGUI::setNumBlocks(int count)
 
         tooltip = tr("Catching up...") + QString("<br>") + tooltip;
         labelBlocksIcon->setMovie(syncIconMovie);
-        // syncIconMovie->start();
-        if(count != prevBlocks)
-            syncIconMovie->start();
-            // syncIconMovie->jumpToNextFrame();
+        syncIconMovie->start();
         prevBlocks = count;
 
         overviewPage->showOutOfSyncWarning(true);
